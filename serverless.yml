@@ -1,0 +1,32 @@
+service: crud-bra
+
+provider:
+    name: aws                             # Car nous utilisons AWS :)
+    region: us-east-1			          # Paris
+    runtime: provided.al2			          # Car nous utilisons le runtime PHP de Bref
+    environment:				          # Variables d'environement Symfony
+        APP_ENV: prod
+
+plugins:
+    - ./vendor/bref/bref		          # Plugin bref installé avec composer
+
+package:
+    exclude:					          # Fichier exclus car non nécessaires pour
+        - node_modules/**		          # l'exécution de notre fonction
+        - tests/**
+
+functions:
+    website:                              # Première fonction exposée
+        handler: public/index.php         # Point d'entrée
+        timeout: 28 			          # en secondes (timeout de 29s chez AWS)
+        layers:                           # Runtime utilisé
+            - ${bref:layer.php-81-fpm}    # liste ici : https://bref.sh/docs/runtimes/index.html
+        events:
+            -   http: 'ANY /'             # Evènements écoutés
+            -   http: 'ANY /{proxy+}'
+    console:                              # Bonus, la console est aussi exposée
+        handler: bin/console
+        timeout: 120 # in seconds
+        layers:
+            - ${bref:layer.php-81-fpm} # PHP
+            - ${bref:layer.console} # The "console" layer

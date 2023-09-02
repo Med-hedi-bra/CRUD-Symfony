@@ -1,0 +1,52 @@
+# see https://symfony.com/doc/current/reference/configuration/framework.html
+framework:
+    secret: '%env(APP_SECRET)%'
+    #csrf_protection: true
+    http_method_override: false
+
+    # Enables session support. Note that the session will ONLY be started if you read or write from it.
+    # Remove or comment this section to explicitly disable session support.
+    session:
+        handler_id: null
+        cookie_secure: auto
+        cookie_samesite: lax
+        storage_factory_id: session.storage.factory.native
+
+    #esi: true
+    #fragments: true
+    php_errors:
+        log: true
+
+    # trusted_proxies: '127.0.0.1'
+    # # trust "X-Forwarded-*" headers coming from API Gateway
+    # trusted_headers: [ 'x-forwarded-for', 'x-forwarded-proto', 'x-forwarded-port','x-forwarded-host' ]
+
+# setting the log directory to /tmp/log/
+monolog:
+    handlers:
+        main:
+            type: stream
+            path: '%kernel.logs_dir%/%kernel.environment%.log'
+            level: debug
+cache:
+    pools:
+        cache.app:
+            adapter: cache.adapter.filesystem
+            default_lifetime: 0
+            public: false
+parameters:
+    kernel.log_dir: /tmp/log/  # Override the log directory for Lambda
+    kernel.cache_dir: /tmp/cache/%kernel.environment%/  # Override the cache directory for Lambda
+
+
+services:
+    _defaults:
+        bind:
+            # Bind the overridden log directory to the Kernel service
+            $logDir: '%kernel.log_dir%'
+            $cacheDir: '%kernel.cache_dir%'
+when@test:
+    framework:
+        test: true
+        session:
+            storage_factory_id: session.storage.factory.mock_file

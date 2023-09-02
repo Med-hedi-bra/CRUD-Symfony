@@ -1,0 +1,10 @@
+version: "3.5"
+
+services:
+    appTest:
+        image: bref/php-81-fpm-dev:2
+        ports: [ '8000:8000' ]
+        volumes:
+            - .:/var/task
+        environment:
+            HANDLER: public/index.php
